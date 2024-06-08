@@ -2,6 +2,16 @@
 using namespace std;
 string Currency = "RP";
 
+void log(const char *msg){
+    time_t now = time(0);
+    struct tm* tm = localtime(&now);    
+    ofstream out( "Financial.txt",ios::app);
+    out << tm->tm_year + 1900 << '/' << tm->tm_mon + 1 << '/' << tm->tm_mday
+         << ' ' << tm->tm_hour << ':' << tm->tm_min << ':' << tm->tm_sec << ": ";
+    out << msg << "\n";
+    out.close();
+}
+
 class Finance{
 private:
     int id;
@@ -16,6 +26,7 @@ public:
         this->tipe = tipe;
         this->jumlah = jumlah;
     }
+    
     int getid(){
         return id;
     }
@@ -31,6 +42,7 @@ public:
     int getjumlah(){
         return jumlah;
     }
+
     bool isEqual(Finance& other){
         return id == other.id;
     }
@@ -103,7 +115,7 @@ private:
             Cur_type = "$ ";
 
         }
-     
+        
         cout << left << setw(5) << "ID"
              << setw(5) << "No"
              << setw(12) << "Date"
@@ -128,6 +140,7 @@ public:
     void create(){
         int choice;
         string date, description, type;
+        char namelog[1000] = "Created the transaction ";
         double amount;
 
         cout << "What is the type of transaction?\n1. Income\n2. Expense\nChoice: ";
@@ -135,13 +148,14 @@ public:
 
         if (choice == 1) {
             type = "Income";
+
         } else if (choice == 2) {
             type = "Expense";
         } else {
             cout << "Invalid choice.\n";
             return;
         }
-
+        
         cout << "Amount gotten (In Rupiah): ";
         cin >> amount;
         cout << "Description for the "<< type << ": ";
@@ -155,7 +169,9 @@ public:
             finances.push_back(Expense(next, date, description, type, amount));
         }
         cout << "Data has been set!\n";
-        next++;
+        next++; 
+        strcat(namelog, type.c_str());
+        log(namelog);
     }
 
     void read(){
@@ -167,12 +183,15 @@ public:
 
         if(choice == 1){
             tipe = filtertype("Income");
+            log("Read the transaction Income.");
 
         } else if(choice == 2){
             tipe = filtertype("Expense");
+            log("Read the transaction Expense.");
 
         } else if(choice == 3){
             tipe = finances;
+            log("Read the transaction Both.");
 
         } else {
             cout << "Invalid choice.\n";
@@ -186,6 +205,7 @@ public:
         filtered = filtermonth(tipe, month);
         print(filtered, Currency);
         average(filtered, Currency);
+        
     }
 
     void update(){
@@ -255,10 +275,21 @@ public:
             else {
                 cout << "Invalid choice.\n";
             }
-
+            log("Update from the transaction has been made.");
             updatebefore(filtered);
         } else {
             cout << "Transaction not found.\n";
+        }
+    }
+
+    void bokek(){
+        cout << "\nInitiating mode bokek\n\n";
+        vector<Finance> data = finances;
+        for (int i = 0; i < data.size(); i++) {
+            if (data[i].getid() == i + 1) {
+                data[i] = Finance(data[i].getid(), data[i].gettanggal(), data[i].getdeskripsi(), data[i].gettipe(), 0);
+                updatebefore(data);
+            }
         }
     }
 
@@ -287,10 +318,12 @@ public:
             cout << "Transaction found.\n";
             finances.erase(finances.begin() + index);
             cout << "Transaction has been deleted.\n";
+            log("Transaction has been deleted.");
         } else {
             cout << "Transaction not found.\n";
         }
     }
+
 };
 
 int main(){
@@ -298,7 +331,7 @@ int main(){
     int choice, run;
 
     while(run){
-        cout << "What do you want to do?\n1. Create a transaction\n2. Read the transaction\n3. Update the transaction\n4. Delete the transaction\n5. Change Currency\n6. Exit\nChoice: ";
+        cout << "What do you want to do?\n1. Create a transaction\n2. Read the transaction\n3. Update the transaction\n4. Delete the transaction\n5. Change Currency\n6. Bokek\n7. Exit\nChoice: ";
         cin >> choice;
 
         if(choice == 1){
@@ -320,6 +353,9 @@ int main(){
             } else cout << "Invalid choice.\n";
             
         } else if(choice == 6){
+            fns.bokek();
+            log("Bokek T^T\n　　　　　／＞　　フ\n　　　　　| 　_　 _ l\n　 　　　／` ミ＿xノ\n　　 　 /　　　 　 |\n　　　 /　 ヽ　　 ﾉ\n　 　 │　　| | |");
+        } else if(choice == 7){
             run = 0;
         } else cout << "Invalid choice.\n";
     }
